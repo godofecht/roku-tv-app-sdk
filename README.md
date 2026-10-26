@@ -35,3 +35,7 @@ See [AGENTS.md](AGENTS.md) for agent instructions. Python 3.9+; no external depe
 ## CommonGround mobile-to-TV app
 
 The room-based mobile app and live Roku pairing workflow are in [CommonGround end-to-end setup](examples/common_ground/END_TO_END.md). Start the FastAPI companion with `uvicorn examples.common_ground.app:app` after installing `examples/common_ground/requirements.txt`. Build the live Roku app using `examples/common_ground/build_live.py`. Google OAuth credentials, HTTPS hosting, Roku developer installation, and real-device verification are required; this is not yet a published consumer channel or a YouTube video player.
+
+## Download portal
+
+[CommonGround Downloads (GitHub Pages)](https://godofecht.github.io/roku-tv-app-sdk/) lists the latest published Roku release ZIP assets, CI artifacts, source downloads, and mobile companion setup. The page deploys via [Pages workflow](https://github.com/godofecht/roku-tv-app-sdk/actions/workflows/pages.yml); enable **Settings → Pages → Build and deployment → GitHub Actions** if deployment is not enabled. No release ZIP is advertised as downloadable until GitHub has actually published it.
