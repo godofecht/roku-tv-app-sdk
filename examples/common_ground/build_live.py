@@ -80,7 +80,10 @@ sub run()
                 m.top.pairCode = ""
                 m.top.feedJson = FormatJson(data)
             else
-                m.top.pairCode = pairCode
+                if data.code <> invalid then
+                    pairCode = data.code
+                    m.top.pairCode = pairCode
+                end if
             end if
         end if
         sleep(10000)
