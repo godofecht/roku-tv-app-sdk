@@ -27,3 +27,7 @@ The generated app contains `manifest`, `source/main.brs`, and `components/MainSc
 This first version supports a static SceneGraph landing screen, deterministic packaging, JSON validation, and a stable CLI suitable for coding agents. It does not yet implement media playback, authentication, device deployment, or the Roku certification pipeline.
 
 See [AGENTS.md](AGENTS.md) for agent instructions. Python 3.9+; no external dependencies.
+
+## Continuous integration
+
+[GitHub Actions CI](https://github.com/godofecht/roku-tv-app-sdk/actions/workflows/ci.yml) validates Python 3.9/3.11/3.13 on Ubuntu, macOS, and Windows, including unit tests, both Roku app builds, generated SceneGraph XML, and package integrity. Roku device execution and Google OAuth integration still require external credentials and hardware.
