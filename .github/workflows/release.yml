@@ -57,10 +57,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
+          SERVER_URL: ${{ inputs.server_url }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! "${{ inputs.server_url }}" =~ ^https://[^[:space:]]+$ ]]; then
+          if [[ ! "$SERVER_URL" =~ ^https://[a-zA-Z0-9.-]+(:[0-9]+)?$ ]]; then
             echo "A public HTTPS server_url is required to publish" >&2
             exit 1
           fi
@@ -75,4 +76,4 @@ jobs:
           gh release create "$RELEASE_TAG" dist/CommonGround-Roku.zip \
             --target "$GITHUB_SHA" \
             --title "CommonGround $RELEASE_TAG" \
-            --notes "Developer-preview Roku sideload package. IMPORTANT: The release requires a separately deployed CommonGround server at ${{ inputs.server_url }}. Not a Roku-certified consumer release."
+            --notes "Developer-preview Roku sideload package. IMPORTANT: The release requires a separately deployed CommonGround server at $SERVER_URL. Not a Roku-certified consumer release."
