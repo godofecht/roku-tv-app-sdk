@@ -56,3 +56,12 @@ jobs:
                   if name.startswith("common-ground"):
                       assert "components/MainScene.brs" in names
                       assert b"onKeyEvent" in archive.read("components/MainScene.brs")
+      - name: Upload validated Roku packages
+        if: success() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: CommonGround-validated-Roku-builds
+          path: |
+            dist/common-ground.zip
+            dist/common-ground-live.zip
+          if-no-files-found: error
