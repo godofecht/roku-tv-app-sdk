@@ -39,3 +39,9 @@ The room-based mobile app and live Roku pairing workflow are in [CommonGround en
 ## Download portal
 
 [CommonGround Downloads (GitHub Pages)](https://godofecht.github.io/roku-tv-app-sdk/) lists the latest published Roku release ZIP assets, CI artifacts, source downloads, and mobile companion setup. The page deploys via [Pages workflow](https://github.com/godofecht/roku-tv-app-sdk/actions/workflows/pages.yml); enable **Settings → Pages → Build and deployment → GitHub Actions** if deployment is not enabled. No release ZIP is advertised as downloadable until GitHub has actually published it.
+
+## Android APK
+
+The Android companion source is in [android/](android/). [Android APK CI](https://github.com/godofecht/roku-tv-app-sdk/actions/workflows/android.yml) builds a debug APK and uploads it as the `CommonGround-Android-APK` workflow artifact. Open a successful workflow run, download the artifact ZIP, extract `CommonGround-Android-debug.apk`, and install it on Android. It is **not** a Play Store release or a signed production release. The Android app opens a configured HTTPS CommonGround backend in the system browser for OAuth/session compatibility. A deployed backend is still required; no offline account sharing is claimed.
+
+The [download portal](https://godofecht.github.io/roku-tv-app-sdk/) links both Android and Roku workflow artifacts and any published release assets.
