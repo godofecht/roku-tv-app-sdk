@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101c2b"><title>CommonGround · Downloads</title>
+<style>
+:root{font:16px/1.5 system-ui,-apple-system,sans-serif;color-scheme:dark;background:#101c2b;color:#f3f7ff}
+*{box-sizing:border-box}body{max-width:900px;margin:0 auto;padding:24px}h1{font-size:clamp(2.3rem,8vw,4rem);margin-bottom:4px}
+p{color:#c5d4e7}section{background:#1a3048;border:1px solid #34516d;border-radius:18px;padding:22px;margin:18px 0}
+a.button{display:inline-block;padding:13px 19px;border-radius:12px;background:#93e6c7;color:#0e2330;font-weight:700;text-decoration:none;margin:5px 8px 5px 0}
+a{color:#a8e8e2}small{color:#b6c9d9}.status{font-weight:600}.pill{display:inline-block;padding:4px 10px;background:#324b62;border-radius:30px}
+li{padding:6px 0}code{overflow-wrap:anywhere}footer{padding:30px 0;color:#aabfd3}
+</style></head><body>
+<header><span class="pill">Open-source developer preview</span><h1>CommonGround</h1>
+<p>Bring your friends' YouTube interests together on your phone and Roku TV.</p></header>
+<section><h2>Roku TV app</h2>
+<p>Download a developer-mode sideloadable ZIP. A running CommonGround backend is required for account linking and live feeds.</p>
+<p id="release-status" class="status" role="status">Checking GitHub releases…</p>
+<div id="release-links"></div>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk/releases">All releases</a>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk/actions/workflows/release.yml">Latest CI build artifacts</a>
+<p><small>CI artifacts may require signing into GitHub. If no release exists, there is no verified public ZIP download yet. Developer ZIPs are not installable through the Roku Channel Store.</small></p>
+</section>
+<section><h2>Mobile web companion</h2>
+<p>The mobile app runs on a server, not on GitHub Pages. Connect YouTube accounts, create a room, share an invite, and pair your TV once the backend is deployed.</p>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk/blob/main/examples/common_ground/END_TO_END.md">Set up mobile companion</a>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk/tree/main/examples/common_ground">View web app source</a>
+<p><small>A hosted companion URL is not yet configured. This download portal is static and cannot itself handle Google sign-in.</small></p>
+</section>
+<section><h2>Install on Roku</h2>
+<ol><li>Build or download a ZIP configured for your publicly reachable HTTPS backend.</li>
+<li>Enable Roku Developer Mode and note the TV's IP address.</li>
+<li>From a browser on the same local network, open <code>http://ROKU_IP</code> and upload the ZIP using the Roku developer installer.</li>
+<li>Open the channel on Roku, then scan the pairing QR code with your phone.</li></ol>
+<a href="https://github.com/godofecht/roku-tv-app-sdk/blob/main/examples/common_ground/END_TO_END.md">Detailed installation guide</a>
+</section>
+<section><h2>Source & build status</h2>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk">GitHub repository</a>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk/actions">Build status</a>
+<a class="button" href="https://github.com/godofecht/roku-tv-app-sdk/archive/refs/heads/main.zip">Download source ZIP</a>
+</section>
+<footer>CommonGround is not affiliated with YouTube, Google, or Roku. YouTube authorization requires consent and configured Google OAuth credentials.</footer>
+<script>
+(async()=>{
+ const status=document.getElementById('release-status');
+ const links=document.getElementById('release-links');
+ try{
+  const response=await fetch('https://api.github.com/repos/godofecht/roku-tv-app-sdk/releases/latest',{headers:{Accept:'application/vnd.github+json'}});
+  if(response.status===404){status.textContent='No published release yet';return;}
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const release=await response.json();
+  status.textContent='Latest release: '+release.tag_name;
+  const assets=(release.assets||[]).filter(a=>/\.zip$/i.test(a.name));
+  for(const asset of assets){
+   const a=document.createElement('a');
+   a.className='button';a.href=asset.browser_download_url;
+   a.textContent='Download '+asset.name;
+   links.appendChild(a);
+  }
+  if(!assets.length)status.textContent+=' — no Roku ZIP attached';
+ }catch(error){status.textContent='Could not load releases. Use the releases link below.';}
+})();
+</script></body></html>
