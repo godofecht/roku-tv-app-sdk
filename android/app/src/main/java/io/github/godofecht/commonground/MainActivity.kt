@@ -37,7 +37,7 @@ class MainActivity : Activity() {
             setText(prefs.getString("url", ""))
         }
         val connect = Button(this).apply {
-            text = "Open secure companion"
+            text = "Open companion in browser"
             setOnClickListener { openCompanion() }
         }
         val help = TextView(this).apply {
@@ -73,7 +73,7 @@ class MainActivity : Activity() {
         root.addView(help)
         root.addView(web, LinearLayout.LayoutParams(-1, 0, 1f))
         setContentView(root)
-        if (!prefs.getString("url", "").isNullOrEmpty()) openCompanion()
+        // Do not automatically launch the browser when settings are opened.
     }
 
     private fun openCompanion() {
@@ -84,7 +84,7 @@ class MainActivity : Activity() {
             return
         }
         prefs.edit().putString("url", url).apply()
-        web.loadUrl(url)
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     }
 
     @Deprecated("Deprecated in Android SDK")
