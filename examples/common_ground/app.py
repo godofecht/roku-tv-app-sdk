@@ -11,7 +11,7 @@ import sqlite3
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, parse_qs
 
 import httpx
 import qrcode
@@ -231,8 +231,8 @@ def create_device():
 @app.post("/pair/{room_id}")
 async def pair(room_id: str, request: Request):
     room_access(request, room_id)
-    form = await request.form()
-    code = str(form.get("code", ""))
+    form = parse_qs((await request.body()).decode("utf-8"))
+    code = form.get("code", [""])[0]
     if len(code) != 6 or not code.isdecimal():
         raise HTTPException(400, "Invalid device code")
     with db() as conn:
@@ -256,6 +256,18 @@ def device_feed(request: Request):
     if not row["room_id"]:
         return {"paired": False, "cards": []}
     return {"paired": True, **feed_for(row["room_id"])}
+
+
+@app.get("/api/device/qr/{code}")
+def device_qr(code: str):
+    with db() as conn:
+        row = conn.execute("SELECT created FROM devices WHERE code=?", (code,)).fetchone()
+    if not row or row["created"] < int(time.time()) - 600:
+        raise HTTPException(404, "Device code expired")
+    image = qrcode.make(PUBLIC_URL + "/?pair=" + code)
+    out = io.BytesIO()
+    image.save(out, format="PNG")
+    return Response(out.getvalue(), media_type="image/png", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/rooms/{room_id}/qr")
