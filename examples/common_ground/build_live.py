@@ -23,6 +23,7 @@ def build_live(data, output):
     ET.SubElement(children, "Rectangle", {"width": "1280", "height": "720", "color": "#101C2B"})
     for name, y in [("heading", 35), ("status", 130), ("title", 260), ("detail", 370), ("hint", 600)]:
         ET.SubElement(children, "Label", {"id": name, "translation": f"[70,{y}]", "width": "1140", "height": "100"})
+    ET.SubElement(children, "Poster", {"id": "pairQR", "translation": "[950,120]", "width": "220", "height": "220"})
     ET.SubElement(children, "FeedTask", {"id": "feedTask"})
     ET.ElementTree(scene).write(output / "components/MainScene.xml", encoding="unicode", xml_declaration=True)
     task = ET.Element("component", {"name": "FeedTask", "extends": "Task"})
@@ -71,6 +72,7 @@ sub run()
         section.Flush()
         m.top.pairCode = pairing.code
     end if
+    pairCode = m.top.pairCode
     while true
         data = requestJson("/api/device/feed", token, "GET")
         if data <> invalid then
@@ -78,7 +80,7 @@ sub run()
                 m.top.pairCode = ""
                 m.top.feedJson = FormatJson(data)
             else
-                m.top.pairCode = "Open __SERVER__ on phone and enter code: " + m.top.pairCode
+                m.top.pairCode = pairCode
             end if
         end if
         sleep(10000)
@@ -89,6 +91,7 @@ end sub
 SCENE = '''sub init()
     m.heading = m.top.findNode("heading")
     m.status = m.top.findNode("status")
+    m.qr = m.top.findNode("pairQR")
     m.title = m.top.findNode("title")
     m.detail = m.top.findNode("detail")
     m.hint = m.top.findNode("hint")
@@ -104,7 +107,12 @@ SCENE = '''sub init()
 end sub
 
 sub onPair()
-    m.status.text = m.task.pairCode
+    if m.task.pairCode = "" then
+        m.qr.visible = false
+        return
+    end if
+    m.status.text = "Scan QR or open companion app. TV code: " + m.task.pairCode
+    m.qr.uri = ""+SERVER+"/api/device/qr/" + m.task.pairCode
 end sub
 
 sub onFeed()
