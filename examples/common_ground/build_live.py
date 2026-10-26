@@ -33,7 +33,7 @@ def build_live(data, output):
     ET.SubElement(task, "script", {"type": "text/brightscript", "uri": "pkg:/components/FeedTask.brs"})
     ET.ElementTree(task).write(output / "components/FeedTask.xml", encoding="unicode", xml_declaration=True)
     (output / "components/FeedTask.brs").write_text(TASK.replace("__SERVER__", SERVER.replace('"', '')), encoding="utf-8")
-    (output / "components/MainScene.brs").write_text(SCENE, encoding="utf-8")
+    (output / "components/MainScene.brs").write_text(SCENE.replace("__SERVER__", SERVER), encoding="utf-8")
 
 
 TASK = '''sub init()
@@ -112,7 +112,7 @@ sub onPair()
         return
     end if
     m.status.text = "Scan QR or open companion app. TV code: " + m.task.pairCode
-    m.qr.uri = ""+SERVER+"/api/device/qr/" + m.task.pairCode
+    m.qr.uri = "__SERVER__/api/device/qr/" + m.task.pairCode
 end sub
 
 sub onFeed()
