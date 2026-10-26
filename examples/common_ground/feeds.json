@@ -60,5 +60,22 @@
         }
       ]
     }
+  ],
+  "bridges": [
+    {
+      "from": "improvisation",
+      "to": "technology",
+      "reason": "Creative systems connect spontaneous performance and electronic experimentation."
+    },
+    {
+      "from": "photography",
+      "to": "travel",
+      "reason": "Exploration and observation connect travel with photography."
+    },
+    {
+      "from": "music",
+      "to": "nature",
+      "reason": "Soundscapes connect musical listening with natural environments."
+    }
   ]
 }
