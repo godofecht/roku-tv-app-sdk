@@ -155,6 +155,41 @@ def dashboard(room_id: str, request: Request):
     </body></html>""")
 
 
+
+@app.get("/api/rooms/{room_id}/members")
+def room_members(room_id: str, request: Request):
+    room_access(request, room_id)
+    with db() as conn:
+        rows = conn.execute("SELECT id,name FROM members WHERE room_id=? ORDER BY name", (room_id,)).fetchall()
+    return {"members": [{"id": r["id"], "name": r["name"]} for r in rows]}
+
+
+@app.delete("/api/rooms/{room_id}/members/{member_id}")
+def remove_member(room_id: str, member_id: str, request: Request):
+    if room_id not in request.session.get("admins", []):
+        raise HTTPException(403, "Only room creator can remove members")
+    with db() as conn:
+        result = conn.execute("DELETE FROM members WHERE room_id=? AND id=?", (room_id, member_id))
+        if result.rowcount == 0:
+            raise HTTPException(404, "Member not found")
+    return {"removed": True}
+
+
+@app.delete("/api/rooms/{room_id}")
+def delete_room(room_id: str, request: Request):
+    if room_id not in request.session.get("admins", []):
+        raise HTTPException(403, "Only room creator can delete room")
+    with db() as conn:
+        conn.execute("DELETE FROM members WHERE room_id=?", (room_id,))
+        conn.execute("DELETE FROM devices WHERE room_id=?", (room_id,))
+        result = conn.execute("DELETE FROM rooms WHERE id=?", (room_id,))
+        if result.rowcount == 0:
+            raise HTTPException(404, "Room not found")
+    request.session["rooms"] = [r for r in request.session.get("rooms", []) if r != room_id]
+    request.session["admins"] = [r for r in request.session.get("admins", []) if r != room_id]
+    return {"deleted": True}
+
+
 @app.get("/api/rooms/{room_id}/feed")
 def room_feed(room_id: str, request: Request):
     room_access(request, room_id)
