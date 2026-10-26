@@ -1,8 +1,6 @@
-# CommonGround
+# CommonGround — cross-interest discovery
 
-A proof-of-concept Roku channel that combines multiple people's feeds into a shared stream ordered by cross-person topic overlap.
-
-Run:
+Build a Roku SceneGraph channel that connects different interests across consented feeds, rather than requiring identical topics.
 
 ```sh
 python3 examples/common_ground/build.py examples/common_ground/feeds.json dist/common-ground
@@ -10,6 +8,8 @@ python3 -m roku_ai package dist/common-ground --out dist/common-ground.zip
 python3 -m unittest discover -s tests -v
 ```
 
-This MVP uses explicitly provided, consented feed data. It does not scrape social networks, infer private interests, or connect to social APIs. It builds a static, sideloadable Roku SceneGraph channel. The TV screen shows the highest-scoring shared topics and an example post for each topic; it is not yet an automatically updating video player.
+Use the Roku remote's left/right or up/down buttons to browse recommended connections. Each card shows two connected interests, a human-authored explanation, and representative posts from different people.
 
-Feed input has `people`, each with `id`, `name`, and `items`; each item has `title` and `topics`. A topic earns a higher score when it is represented by more distinct people. Multiple posts by one person do not increase cross-person coverage. Use meaningful shared topic identifiers; semantic similarity and inferred commonality are future work.
+The input JSON contains `people` with `id`, `name`, and `items` (each with `title` and `topics`). An optional `bridges` array contains `from`, `to`, and `reason` fields. Bridges are explicit, auditable editorial relationships; no semantic model or social API is required. Rankings count distinct participants and cross-person pairs, not raw posts from one person. Ties are deterministic.
+
+The generated package is a **static interactive discovery feed**. It does not fetch live feeds, play media, provide authentication, or claim Roku certification. It requires sideloading on a developer-enabled Roku device for on-device validation.
