@@ -80,7 +80,7 @@ def generate(data, output):
         encoding="unicode", xml_declaration=True
     )
     def clean(value, limit=100):
-        return str(value).replace("\\n", " ").replace("\\r", " ")[:limit]
+        return str(value).replace("\n", " ").replace("\r", " ")[:limit]
     cards = []
     for entry in recommendations:
         cards.append({
@@ -144,10 +144,10 @@ def generate(data, output):
         "end function",
     ]
     (output / "components" / "MainScene.brs").write_text(
-        "\\n".join(lines) + "\\n", encoding="utf-8"
+        "\n".join(lines) + "\n", encoding="utf-8"
     )
     (output / "commonality.json").write_text(
-        json.dumps(recommendations, indent=2) + "\\n", encoding="utf-8"
+        json.dumps(recommendations, indent=2) + "\n", encoding="utf-8"
     )
     return recommendations
 
