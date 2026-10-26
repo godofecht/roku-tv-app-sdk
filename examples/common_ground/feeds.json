@@ -1,0 +1,64 @@
+{
+  "people": [
+    {
+      "id": "alex",
+      "name": "Alex",
+      "items": [
+        {
+          "title": "Jazz improvisation",
+          "topics": [
+            "music",
+            "improvisation"
+          ]
+        },
+        {
+          "title": "Night-sky photography",
+          "topics": [
+            "photography",
+            "nature"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sam",
+      "name": "Sam",
+      "items": [
+        {
+          "title": "Making electronic music",
+          "topics": [
+            "music",
+            "technology"
+          ]
+        },
+        {
+          "title": "Hiking through forests",
+          "topics": [
+            "nature",
+            "travel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jo",
+      "name": "Jo",
+      "items": [
+        {
+          "title": "Improvising on guitar",
+          "topics": [
+            "music",
+            "improvisation"
+          ]
+        },
+        {
+          "title": "Wildlife photography",
+          "topics": [
+            "photography",
+            "nature"
+          ]
+        }
+      ]
+    }
+  ]
+}
