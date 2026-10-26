@@ -21,6 +21,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install CommonGround web dependencies
+        run: python -m pip install -r examples/common_ground/requirements.txt
       - name: Compile Python sources
         run: python -m compileall -q roku_ai examples/common_ground tests
       - name: Run unit tests
@@ -34,19 +36,23 @@ jobs:
         run: |
           python examples/common_ground/build.py examples/common_ground/feeds.json dist/common-ground
           python -m roku_ai package dist/common-ground --out dist/common-ground.zip
+      - name: Build live Roku companion
+        run: |
+          python examples/common_ground/build_live.py examples/common_ground/feeds.json dist/common-ground-live
+          python -m roku_ai package dist/common-ground-live --out dist/common-ground-live.zip
       - name: Validate ZIP contents and generated SceneGraph
         shell: python
         run: |
           from pathlib import Path
           from xml.etree import ElementTree as ET
           import zipfile
-          for name in ("example", "common-ground"):
+          for name in ("example", "common-ground", "common-ground-live"):
               path = Path("dist") / (name + ".zip")
               with zipfile.ZipFile(path) as archive:
                   assert archive.testzip() is None
                   names = set(archive.namelist())
                   assert {"manifest", "source/main.brs", "components/MainScene.xml"} <= names
                   ET.fromstring(archive.read("components/MainScene.xml"))
-                  if name == "common-ground":
+                  if name.startswith("common-ground"):
                       assert "components/MainScene.brs" in names
                       assert b"onKeyEvent" in archive.read("components/MainScene.brs")
