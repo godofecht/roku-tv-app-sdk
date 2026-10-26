@@ -132,6 +132,9 @@ def dashboard(room_id: str, request: Request):
     import html
     invite = PUBLIC_URL + "/join/" + room_id
     feed = feed_for(room_id)
+    pair_code = request.query_params.get("pair", "")
+    if len(pair_code) != 6 or not pair_code.isdecimal():
+        pair_code = ""
     cards = "".join("<li>" + html.escape(c["title"]) + " — " + html.escape(c["subtitle"]) + "</li>" for c in feed["cards"][:30])
     return HTMLResponse(f"""<!doctype html><html lang="en"><head>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -145,7 +148,7 @@ def dashboard(room_id: str, request: Request):
     <p>Share this link privately. Anyone with the link can join the room.</p>
     <h2>Your YouTube account</h2><a href="/auth/google/{room_id}">Connect YouTube with Google</a>
     <h2>Connect a Roku TV</h2><form action="/pair/{room_id}" method="post">
-    <label>Enter the six-digit code shown on TV <input name="code" maxlength="6" pattern="[0-9]{{6}}" required></label>
+    <label>Enter the six-digit code shown on TV <input name="code" value="{pair_code}" maxlength="6" pattern="[0-9]{{6}}" required></label>
     <button type="submit">Connect TV</button></form>
     <h2>Discover</h2><ul>{cards or "<li>Invite someone to get started</li>"}</ul>
     <p>Refreshes every 30 seconds. Only connect accounts you own or have permission to share.</p>
@@ -288,5 +291,5 @@ def home():
     <button id="start">Create private room</button><script>
     document.getElementById("start").onclick=async()=>{
       const r=await fetch("/api/rooms",{method:"POST"});if(r.ok){
-      const data=await r.json();location.href="/room/"+data.room;}}
+      const data=await r.json();location.href="/room/"+data.room+"?pair="+encodeURIComponent(new URLSearchParams(location.search).get("pair")||"");}}
     </script></body></html>"""
