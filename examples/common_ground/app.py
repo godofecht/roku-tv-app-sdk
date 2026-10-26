@@ -253,11 +253,11 @@ def device_feed(request: Request):
         raise HTTPException(401, "Device token required")
     token = authorization[7:]
     with db() as conn:
-        row = conn.execute("SELECT room_id FROM devices WHERE device_token=?", (token,)).fetchone()
+        row = conn.execute("SELECT room_id,code,created FROM devices WHERE device_token=?", (token,)).fetchone()
     if not row:
         raise HTTPException(401, "Unknown device")
     if not row["room_id"]:
-        return {"paired": False, "cards": []}
+        return {"paired": False, "code": row["code"], "cards": []}
     return {"paired": True, **feed_for(row["room_id"])}
 
 
