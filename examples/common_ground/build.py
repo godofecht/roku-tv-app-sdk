@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from xml.etree import ElementTree as ET
+from discovery import discover
 
 # Allow execution from the repository root without installation.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -50,48 +51,104 @@ def shared_topics(data):
 
 
 def generate(data, output):
-    ranked = shared_topics(data)
+    recommendations = discover(data)
     build_roku({
         "title": "CommonGround",
-        "subtitle": "Shared interests, different perspectives",
-        "version": "0.1.0",
+        "subtitle": "Discover connections between different interests",
+        "version": "0.2.0",
         "background_color": "#101C2B"
     }, output)
     output = Path(output)
     scene = ET.Element("component", {"name": "MainScene", "extends": "Scene"})
+    ET.SubElement(scene, "script", {"type": "text/brightscript", "uri": "pkg:/components/MainScene.brs"})
     children = ET.SubElement(scene, "children")
     ET.SubElement(children, "Rectangle", {
         "width": "1280", "height": "720", "color": "#101C2B"
     })
-    ET.SubElement(children, "Label", {
-        "text": "CommonGround", "translation": "[70,35]",
-        "width": "1140", "height": "80"
-    })
-    ET.SubElement(children, "Label", {
-        "text": "Where your feeds meet", "translation": "[70,115]",
-        "width": "1140", "height": "60"
-    })
-    for i, entry in enumerate(ranked[:5]):
-        # Avoid excessive text and screen overflow on a 720p layout.
-        preview = entry["posts"][0][2].replace("\n", " ")[:65]
-        label = f'{entry["topic"].title()}  |  {entry["people"]} people  |  {preview}'
+    for ident, y, height in [
+        ("heading", 35, 80), ("counter", 130, 55),
+        ("topics", 220, 80), ("reason", 320, 100),
+        ("people", 460, 100), ("hint", 630, 60)
+    ]:
         ET.SubElement(children, "Label", {
-            "text": label, "translation": f"[70,{205 + 90 * i}]",
-            "width": "1140", "height": "72"
-        })
-    if not ranked:
-        ET.SubElement(children, "Label", {
-            "text": "No shared topics yet", "translation": "[70,240]",
-            "width": "1140", "height": "80"
+            "id": ident, "translation": f"[70,{y}]",
+            "width": "1140", "height": str(height)
         })
     ET.ElementTree(scene).write(
         output / "components" / "MainScene.xml",
         encoding="unicode", xml_declaration=True
     )
-    (output / "commonality.json").write_text(
-        json.dumps(ranked, indent=2) + "\n", encoding="utf-8"
+    def clean(value, limit=100):
+        return str(value).replace("\\n", " ").replace("\\r", " ")[:limit]
+    cards = []
+    for entry in recommendations:
+        cards.append({
+            "topics": clean(entry["from"].title() + " + " + entry["to"].title()),
+            "reason": clean(entry["reason"]),
+            "people": clean(entry["left"]["person"] + ": " + entry["left"]["title"]
+                            + " / " + entry["right"]["person"] + ": " + entry["right"]["title"])
+        })
+    def brs(value):
+        # JSON strings are valid BrightScript string literals only after
+        # replacing JSON escape sequences and doubling quote characters.
+        return '"' + clean(value).replace('"', '""') + '"'
+    lines = [
+        "sub init()",
+        '    m.heading = m.top.findNode("heading")',
+        '    m.counter = m.top.findNode("counter")',
+        '    m.topics = m.top.findNode("topics")',
+        '    m.reason = m.top.findNode("reason")',
+        '    m.people = m.top.findNode("people")',
+        '    m.hint = m.top.findNode("hint")',
+        '    m.heading.text = "CommonGround | Cross-interest discovery"',
+        '    m.hint.text = "LEFT / RIGHT to browse connections"',
+        '    m.cards = []',
+    ]
+    for card in cards:
+        lines.append("    m.cards.push({topics: " + brs(card["topics"])
+                     + ", reason: " + brs(card["reason"])
+                     + ", people: " + brs(card["people"]) + "})")
+    lines += [
+        "    m.index = 0",
+        "    renderCard()",
+        "    m.top.setFocus(true)",
+        "end sub",
+        "",
+        "sub renderCard()",
+        "    if m.cards.count() = 0 then",
+        '        m.counter.text = "No cross-interest bridges found"',
+        '        m.topics.text = "Add bridges between different feed topics"',
+        '        m.reason.text = ""',
+        '        m.people.text = ""',
+        "        return",
+        "    end if",
+        "    card = m.cards[m.index]",
+        '    m.counter.text = str(m.index + 1).trim() + " / " + str(m.cards.count()).trim()',
+        "    m.topics.text = card.topics",
+        "    m.reason.text = card.reason",
+        "    m.people.text = card.people",
+        "end sub",
+        "",
+        "function onKeyEvent(key as String, press as Boolean) as Boolean",
+        "    if not press or m.cards.count() = 0 then return false",
+        '    if key = "right" or key = "down" then',
+        "        m.index = (m.index + 1) mod m.cards.count()",
+        '    else if key = "left" or key = "up" then',
+        "        m.index = (m.index + m.cards.count() - 1) mod m.cards.count()",
+        "    else",
+        "        return false",
+        "    end if",
+        "    renderCard()",
+        "    return true",
+        "end function",
+    ]
+    (output / "components" / "MainScene.brs").write_text(
+        "\\n".join(lines) + "\\n", encoding="utf-8"
     )
-    return ranked
+    (output / "commonality.json").write_text(
+        json.dumps(recommendations, indent=2) + "\\n", encoding="utf-8"
+    )
+    return recommendations
 
 
 if __name__ == "__main__":
