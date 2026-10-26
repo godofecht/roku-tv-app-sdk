@@ -59,6 +59,19 @@ class CommonGroundIntegrationTests(unittest.TestCase):
         self.assertEqual(cards[0]["title"], "Music")
         self.assertEqual(cards[1]["kind"], "explore")
 
+    def test_admin_can_remove_member_and_delete_room(self):
+        room = self.client.post("/api/rooms").json()["room"]
+        with service.db() as conn:
+            conn.execute("INSERT INTO members VALUES(?,?,?,?,?)", ("m1", room, "sub1", "Alex", "[]"))
+        stranger = TestClient(service.app)
+        try:
+            self.assertEqual(stranger.delete(f"/api/rooms/{room}/members/m1").status_code, 403)
+            self.assertEqual(self.client.delete(f"/api/rooms/{room}/members/m1").status_code, 200)
+            self.assertEqual(self.client.delete(f"/api/rooms/{room}").status_code, 200)
+            self.assertEqual(self.client.get(f"/api/rooms/{room}/feed").status_code, 403)
+        finally:
+            stranger.close()
+
     def test_qr_and_expired_code(self):
         device = self.client.post("/api/devices").json()
         result = self.client.get("/api/device/qr/" + device["code"])
