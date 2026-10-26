@@ -163,10 +163,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(302)
             self.send_header("Location", "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params))
             self.send_header("Cache-Control", "no-store")
+            self.send_header("Set-Cookie", "cg_oauth=" + state + "; HttpOnly; SameSite=Lax; Path=/oauth/callback" + ("; Secure" if BASE_URL.startswith("https://") else ""))
             self.end_headers()
             return
         if url.path == "/oauth/callback":
             state = query.get("state", [""])[0]
+            cookies = dict(part.strip().split("=", 1) for part in self.headers.get("Cookie", "").split(";") if "=" in part)
+            if not state or not secrets.compare_digest(state, cookies.get("cg_oauth", "")):
+                return self.respond(400, "OAuth state mismatch.")
             code = query.get("code", [""])[0]
             with LOCK:
                 pending = PENDING.pop(state, None)
