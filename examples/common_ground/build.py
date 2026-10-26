@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from xml.etree import ElementTree as ET
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from discovery import discover
 
 # Allow execution from the repository root without installation.
