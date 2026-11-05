@@ -24,9 +24,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - name: Install Android SDK 35 and build tools
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      # v3 requested the removed SDK "tools" package on hosted runners.
+      # v4 installs the supported command-line tools and requested SDK packages.
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
       - name: Install Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
